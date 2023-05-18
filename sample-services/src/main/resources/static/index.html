@@ -1,0 +1,82 @@
+<html>
+ <head>
+     <title>Using Ktor WebSockets</title>
+     <script>
+         function loadAllSessions() {
+             loadSessions("")
+         }
+
+         function loadSessionsByDate(date) {
+             loadSessions(`/${date}`)
+         }
+         function loadSessions(url) {
+             clearTable();
+
+             const serverURL = `ws://0.0.0.0:8080/goto/sessions${url}`;
+             const socket = new WebSocket(serverURL);
+
+             socket.addEventListener("message", (event) => {
+                 let gotoSession = JSON.parse(event.data);
+                 logSessionToConsole(gotoSession);
+                 displaySessionOnPage(gotoSession);
+             });
+         }
+
+         function logSessionToConsole(gotoSession) {
+             let message = `${gotoSession.talkTitle} by ${gotoSession.speaker} on ${gotoSession.date}`;
+             console.log(message);
+         }
+
+         function tableBody() {
+             return document.getElementById("gotoSessions");
+         }
+
+         function clearTable() {
+             tableBody().innerHTML = "";
+         }
+
+         function displaySessionOnPage(gotoSession) {
+             let tableRow = createTableRow(gotoSession);
+             tableBody().appendChild(tableRow);
+         }
+
+         function createTableRow(gotoSession) {
+             function createCellWithText(text) {
+                 let cell = document.createElement("td");
+                 let cellText = document.createTextNode(text);
+                 cell.appendChild(cellText);
+                 return cell;
+             }
+
+             let tr = document.createElement("tr");
+             tr.appendChild(createCellWithText(gotoSession.talkTitle));
+             tr.appendChild(createCellWithText(gotoSession.speaker));
+             tr.appendChild(createCellWithText(gotoSession.date));
+             return tr;
+         }
+     </script>
+ </head>
+ <body>
+   <h1>View the GOTO Sessions</h1>
+   <p>
+       <span><a href="javascript:loadAllSessions()">All Sessions</a></span>
+       <span> | </span>
+       <span><a href="javascript:loadSessionsByDate('2023-05-22')">Monday</a></span>
+       <span> | </span>
+       <span><a href="javascript:loadSessionsByDate('2023-05-23')">Tuesday</a></span>
+       <span> | </span>
+       <span><a href="javascript:loadSessionsByDate('2023-05-24')">Wednesday</a></span>
+   </p>
+   <table rules="all">
+        <thead>
+            <tr>
+                <th>Talk Title</th>
+                <th>Speakers Name</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+       <tbody id="gotoSessions">
+       </tbody>
+   </table>
+ </body>
+</html>
